@@ -1,3 +1,5 @@
+import 'package:dro_health/models/cart.dart';
+
 import 'index.dart';
 
 void main() {
@@ -8,19 +10,24 @@ class MyApp extends StatelessWidget {
   // This widget is the root of your application.
   @override
   Widget build(BuildContext context) {
-    return MaterialApp(
-      title: 'DRO HEALTH',
-      theme: ThemeData(
-        fontFamily: "Proxima Nova",
-        appBarTheme: AppBarTheme(
-          color: Colors.white,
-          iconTheme: IconThemeData(
-            color: Colors.black,
+    return ChangeNotifierProvider<Cart>(
+      create: (context) {
+        return Cart();
+      },
+      child: MaterialApp(
+        title: 'DRO HEALTH',
+        theme: ThemeData(
+          fontFamily: "Proxima Nova",
+          appBarTheme: AppBarTheme(
+            color: Colors.white,
+            iconTheme: IconThemeData(
+              color: Colors.black,
+            ),
           ),
         ),
+        home: RootApp(),
+        debugShowCheckedModeBanner: false,
       ),
-      home: RootApp(),
-      debugShowCheckedModeBanner: false,
     );
   }
 }

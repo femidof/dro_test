@@ -1,6 +1,10 @@
 import 'package:draggable_bottom_sheet/draggable_bottom_sheet.dart';
 import 'package:dro_health/dummyData/products.dart';
 import 'package:dro_health/index.dart';
+import 'package:dro_health/models/product.dart';
+import 'package:dro_health/screens/widgets/product_detail.dart';
+import 'package:flutter_number_picker/flutter_number_picker.dart';
+import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 
 class StoreScreen extends StatefulWidget {
   @override
@@ -10,10 +14,19 @@ class StoreScreen extends StatefulWidget {
 class _StoreScreenState extends State<StoreScreen> {
   int added = 0;
   bool sort = false;
-  bool searchBar = true;
+  bool searchBar = false;
   bool filter = true;
   String searchText = "";
   TextEditingController textController = TextEditingController();
+  List<Product> cart = [];
+  List<Product> _searchResult = [];
+  bool showMore = false;
+
+  void toggleShowMoreInCart() {
+    setState(() {
+      showMore = !showMore;
+    });
+  }
 
   void toggleSearch() {
     if (searchBar == true) {
@@ -51,8 +64,41 @@ class _StoreScreenState extends State<StoreScreen> {
     }
   }
 
+  onSearchTextChanged(String text) async {
+    setState(() {
+      _searchResult.clear();
+    });
+    if (text.isEmpty) {
+      setState(() {});
+      return;
+    }
+    products.forEach((products) {
+      if (products.nameOfProduct.contains(text) ||
+          products.description.contains(text))
+        setState(() {
+          _searchResult.add(products);
+        });
+    });
+
+    setState(() {});
+  }
+
+  void addToCart(Product product) {
+    cart.add(product);
+  }
+
   @override
   Widget build(BuildContext context) {
+    void gotoproductDetailsPage(Product product) {
+      Navigator.push(context, MaterialPageRoute(
+        builder: (context) {
+          return ProductDetail(
+            product: product,
+          );
+        },
+      ));
+    }
+
     Size size = MediaQuery.of(context).size;
     return Scaffold(
       body: DraggableBottomSheet(
@@ -76,7 +122,7 @@ class _StoreScreenState extends State<StoreScreen> {
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
                     BagWidget(),
-                    counterWidget(text: added.toString()),
+                    counterWidget(),
                   ],
                 ),
               )
@@ -112,9 +158,7 @@ class _StoreScreenState extends State<StoreScreen> {
                   ),
                   Column(
                     children: [
-                      counterWidget(
-                        text: added.toString(),
-                      ),
+                      counterWidget(),
                     ],
                   )
                 ],
@@ -135,12 +179,170 @@ class _StoreScreenState extends State<StoreScreen> {
                     color: Colors.white,
                     borderRadius: BorderRadius.circular(20)),
               ),
+              SizedBox(
+                height: 18,
+              ),
 
               // Products in cart
-              Container(
-                child: SingleChildScrollView(
+              Flexible(
+                child: Container(
                   child: Column(
-                    children: [],
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      Flexible(child: Consumer<Cart>(
+                        builder: (context, cart, child) {
+                          return ListView.builder(
+                            padding: EdgeInsets.all(9),
+                            itemCount: cart.countProduct,
+                            itemBuilder: (context, index) {
+                              return Column(
+                                children: [
+                                  ListTile(
+                                    leading: CircleAvatar(
+                                        backgroundImage: NetworkImage(cart
+                                            .productsInCart
+                                            .elementAt(index)
+                                            .productImage)),
+                                    title: Text(
+                                      cart.productsInCart
+                                          .elementAt(index)
+                                          .nameOfProduct,
+                                      style: TextStyle(color: Colors.white),
+                                    ),
+                                    onTap: toggleShowMoreInCart,
+                                    trailing: Text(
+                                        "#" +
+                                            cart.productsInCart
+                                                .elementAt(index)
+                                                .price
+                                                .toString(),
+                                        style: TextStyle(color: Colors.white)),
+                                    subtitle: Text(
+                                        cart.productsInCart
+                                            .elementAt(index)
+                                            .type,
+                                        style: TextStyle(color: Colors.white)),
+                                  ),
+                                  showMore
+                                      ? Row(
+                                          mainAxisAlignment:
+                                              MainAxisAlignment.spaceBetween,
+                                          children: [
+                                            IconButton(
+                                              onPressed: () {},
+                                              icon: FaIcon(
+                                                  FontAwesomeIcons.trash,
+                                                  color: Colors.white),
+                                            ),
+                                            Column(
+                                              children: [
+                                                CustomNumberPicker(
+                                                     
+                                                    customAddButton:
+                                                        Container(
+                                                      width: 50,
+                                                      height: 50,
+                                                      child: Center(
+                                                        child: Icon(Icons.add,
+                                                            color:
+                                                                UniversalVariables
+                                                                    .droPurple),
+                                                      ),
+                                                      decoration:
+                                                          BoxDecoration(
+                                                        borderRadius:
+                                                            BorderRadius
+                                                                .circular(50),
+                                                        color: Colors.white,
+                                                      ),
+                                                    ),
+                                                    step: 1,
+                                                    shape:
+                                                        RoundedRectangleBorder(
+                                                      side: BorderSide.none,
+                                                    ),
+                                                    customMinusButton:
+                                                        Container(
+                                                      width: 50,
+                                                      height: 50,
+                                                      child: Center(
+                                                        child: Icon(
+                                                            Icons.remove,
+                                                            color:
+                                                                UniversalVariables
+                                                                    .droPurple),
+                                                      ),
+                                                      decoration:
+                                                          BoxDecoration(
+                                                        borderRadius:
+                                                            BorderRadius
+                                                                .circular(50),
+                                                        color: Colors.white,
+                                                      ),
+                                                    ),
+                                                    onValue: (value) {
+                                                      print(value.toString());
+                                                    },
+                                                    initialValue: 1,
+                                                    maxValue: 10,
+                                                    minValue: 0),
+                                              ],
+                                            ),
+                                          ],
+                                        )
+                                      : Container(),
+                                ],
+                              );
+                            },
+                            physics: BouncingScrollPhysics(),
+                          );
+                        },
+                      )),
+                      Padding(
+                        padding: const EdgeInsets.only(top: 18),
+                        child: Row(
+                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                          children: [
+                            Text("Total",
+                                style: TextStyle(color: Colors.white)),
+                            Text("#2590",
+                                style: TextStyle(color: Colors.white)),
+                          ],
+                        ),
+                      ),
+                      Padding(
+                        padding: const EdgeInsets.only(
+                          left: 55,
+                          right: 55,
+                        ),
+                        child: ElevatedButton(
+                            style: ButtonStyle(
+                              backgroundColor:
+                                  MaterialStateProperty.resolveWith<Color>(
+                                (Set<MaterialState> states) {
+                                  if (states.contains(MaterialState.pressed))
+                                    return UniversalVariables.droTurquoise;
+                                  return Colors.white;
+                                },
+                              ),
+                              shape: MaterialStateProperty.resolveWith<
+                                  OutlinedBorder>(
+                                (Set<MaterialState> states) {
+                                  if (states.contains(MaterialState.pressed))
+                                    return RoundedRectangleBorder(
+                                        borderRadius:
+                                            BorderRadius.circular(20));
+                                  return RoundedRectangleBorder(
+                                      borderRadius: BorderRadius.circular(
+                                          20)); // Use the component's default.
+                                },
+                              ),
+                            ),
+                            onPressed: () {},
+                            child: Text("      Checkout       ",
+                                style: TextStyle(color: Colors.black))),
+                      ),
+                    ],
                   ),
                 ),
               ),
@@ -275,6 +477,7 @@ class _StoreScreenState extends State<StoreScreen> {
                         controller: textController,
                         onChanged: (value) {
                           setState(() {
+                            onSearchTextChanged(value);
                             searchText = value;
                           });
                         },
@@ -323,32 +526,74 @@ class _StoreScreenState extends State<StoreScreen> {
                 child: Container(
                   height: size.height * 0.9,
                   padding: EdgeInsets.all(10),
-                  child: GridView.builder(
-                    padding: const EdgeInsets.only(bottom: 100),
-                    physics: BouncingScrollPhysics(),
-                    gridDelegate: SliverGridDelegateWithMaxCrossAxisExtent(
-                      maxCrossAxisExtent: 220,
-                      childAspectRatio: 4 / 5,
-                      crossAxisSpacing: 10,
-                      mainAxisSpacing: 10,
-                    ),
-                    scrollDirection: Axis.vertical,
-                    itemCount: products.length,
-                    itemBuilder: (context, index) {
-                      return ProductCard(
-                        measure: products.elementAt(index).measure,
-                        type: products.elementAt(index).type,
-                        constituent: products.elementAt(index).constituent,
-                        nameOfProduct: products.elementAt(index).nameOfProduct,
-                        description: products.elementAt(index).description,
-                        productImage: products.elementAt(index).productImage,
-                        price: products.elementAt(index).price,
-                        size: size,
-                        onTap: () {},
-                        text: "Hello",
-                      );
-                    },
-                  ),
+                  child: _searchResult.length != 0 ||
+                          textController.text.isNotEmpty
+                      ? GridView.builder(
+                          padding: const EdgeInsets.only(bottom: 100),
+                          physics: BouncingScrollPhysics(),
+                          gridDelegate:
+                              SliverGridDelegateWithMaxCrossAxisExtent(
+                            maxCrossAxisExtent: 220,
+                            childAspectRatio: 4 / 5,
+                            crossAxisSpacing: 10,
+                            mainAxisSpacing: 10,
+                          ),
+                          scrollDirection: Axis.vertical,
+                          itemCount: _searchResult.length,
+                          itemBuilder: (context, index) {
+                            return ProductCard(
+                              measure: _searchResult.elementAt(index).measure,
+                              type: _searchResult.elementAt(index).type,
+                              constituent:
+                                  _searchResult.elementAt(index).constituent,
+                              nameOfProduct:
+                                  _searchResult.elementAt(index).nameOfProduct,
+                              description:
+                                  _searchResult.elementAt(index).description,
+                              productImage:
+                                  _searchResult.elementAt(index).productImage,
+                              price: _searchResult.elementAt(index).price,
+                              size: size,
+                              onTap: () {
+                                gotoproductDetailsPage(
+                                    _searchResult.elementAt(index));
+                              },
+                            );
+                          },
+                        )
+                      : GridView.builder(
+                          padding: const EdgeInsets.only(bottom: 100),
+                          physics: BouncingScrollPhysics(),
+                          gridDelegate:
+                              SliverGridDelegateWithMaxCrossAxisExtent(
+                            maxCrossAxisExtent: 220,
+                            childAspectRatio: 4 / 5,
+                            crossAxisSpacing: 10,
+                            mainAxisSpacing: 10,
+                          ),
+                          scrollDirection: Axis.vertical,
+                          itemCount: products.length,
+                          itemBuilder: (context, index) {
+                            return ProductCard(
+                              measure: products.elementAt(index).measure,
+                              type: products.elementAt(index).type,
+                              constituent:
+                                  products.elementAt(index).constituent,
+                              nameOfProduct:
+                                  products.elementAt(index).nameOfProduct,
+                              description:
+                                  products.elementAt(index).description,
+                              productImage:
+                                  products.elementAt(index).productImage,
+                              price: products.elementAt(index).price,
+                              size: size,
+                              onTap: () {
+                                gotoproductDetailsPage(
+                                    products.elementAt(index));
+                              },
+                            );
+                          },
+                        ),
                 ),
               ),
             ],
@@ -358,18 +603,23 @@ class _StoreScreenState extends State<StoreScreen> {
     );
   }
 
-  Container counterWidget({String text}) {
+//  addToCart(products.elementAt(index));
+  Container counterWidget() {
     return Container(
       width: 50,
       height: 50,
-      child: Center(
-          child: Text(
-        text ?? "0",
-        style: TextStyle(
-          fontWeight: FontWeight.bold,
-          fontSize: 18,
-        ),
-      )),
+      child: Consumer<Cart>(
+        builder: (context, cart, child) {
+          return Center(
+              child: Text(
+            cart.countProduct.toString() ?? "0",
+            style: TextStyle(
+              fontWeight: FontWeight.bold,
+              fontSize: 18,
+            ),
+          ));
+        },
+      ),
       decoration: BoxDecoration(
         borderRadius: BorderRadius.circular(50),
         color: Colors.white,

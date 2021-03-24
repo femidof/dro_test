@@ -25,9 +25,9 @@ dependencies:
     sdk: flutter
   cupertino_icons: ^1.0.2
   draggable_bottom_sheet: ^0.1.2
-  flutter_neumorphic: ^3.1.0
+  flutter_number_picker: ^0.0.8
   font_awesome_flutter: ^9.0.0
-  google_fonts: ^2.0.0
+  provider: ^5.0.0
 
 dev_dependencies:
   flutter_test:

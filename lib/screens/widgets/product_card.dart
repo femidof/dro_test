@@ -1,11 +1,9 @@
 import 'package:dro_health/index.dart';
-import 'package:flutter_neumorphic/flutter_neumorphic.dart';
 
 class ProductCard extends StatefulWidget {
   const ProductCard({
     @required this.size,
     @required this.onTap,
-    @required this.text,
     @required this.productImage,
     @required this.price,
     @required this.constituent,
@@ -22,7 +20,6 @@ class ProductCard extends StatefulWidget {
   final List constituent;
   final Size size;
   final Function onTap;
-  final String text;
   final String type;
   final String measure;
 
@@ -127,6 +124,4 @@ class _ProductCardState extends State<ProductCard> {
       ),
     );
   }
-
-  moveToProductPage() {}
 }
