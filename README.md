@@ -1,6 +1,6 @@
 # dro_health
 
-A new Flutter project.
+A project testing on architecture and how to solve complex activity based on an Ecommerce platform
 
 ## Getting Started
 
@@ -14,3 +14,7 @@ A few resources to get you started if this is your first Flutter project:
 For help getting started with Flutter, view our
 [online documentation](https://flutter.dev/docs), which offers tutorials,
 samples, guidance on mobile development, and a full API reference.
+
+## Overview on the finished product
+
+![Gif task](http://g.recordit.co/lEGdxHhcOA.gif)
