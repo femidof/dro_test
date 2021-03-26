@@ -36,7 +36,7 @@ class _ProductCardState extends State<ProductCard> {
       child: GestureDetector(
         onTap: widget.onTap,
         child: Card(
-          color: Colors.white,
+          color: UniversalVariables.white,
           elevation: 2,
           shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.circular(15.0),
@@ -62,12 +62,10 @@ class _ProductCardState extends State<ProductCard> {
                   crossAxisAlignment: CrossAxisAlignment.end,
                   children: [
                     Row(
-                      // mainAxisAlignment: MainAxisAlignment.start,
                       children: [
                         Padding(
                           padding: const EdgeInsets.all(8.0),
                           child: Column(
-                            // mainAxisAlignment: MainAxisAlignment.start,
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
                               Text(
@@ -110,7 +108,7 @@ class _ProductCardState extends State<ProductCard> {
                               top: 3.0, bottom: 3, left: 10, right: 10),
                           child: Text(
                             "#" + widget.price.toString(),
-                            style: TextStyle(color: Colors.white),
+                            style: TextStyle(color: UniversalVariables.white),
                           ),
                         ),
                       ),

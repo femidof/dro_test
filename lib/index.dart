@@ -5,3 +5,6 @@ export 'package:dro_health/screens/widgets/product_card.dart';
 export 'package:provider/provider.dart';
 export 'package:dro_health/models/product.dart';
 export 'package:dro_health/models/cart.dart';
+export 'package:flutter_number_picker/flutter_number_picker.dart';
+export 'package:font_awesome_flutter/font_awesome_flutter.dart';
+export 'package:awesome_dialog/awesome_dialog.dart';

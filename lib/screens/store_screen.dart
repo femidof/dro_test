@@ -20,12 +20,18 @@ class _StoreScreenState extends State<StoreScreen> {
   TextEditingController textController = TextEditingController();
   List<Product> cart = [];
   List<Product> _searchResult = [];
-  bool showMore = false;
+  FocusNode searchFocusNode;
 
-  void toggleShowMoreInCart() {
-    setState(() {
-      showMore = !showMore;
-    });
+  @override
+  void initState() {
+    super.initState();
+    searchFocusNode = FocusNode();
+  }
+
+  @override
+  void dispose() {
+    searchFocusNode.dispose();
+    super.dispose();
   }
 
   void toggleSearch() {
@@ -36,6 +42,7 @@ class _StoreScreenState extends State<StoreScreen> {
     } else {
       setState(() {
         searchBar = true;
+        searchFocusNode.requestFocus();
       });
     }
   }
@@ -73,8 +80,8 @@ class _StoreScreenState extends State<StoreScreen> {
       return;
     }
     products.forEach((products) {
-      if (products.nameOfProduct.contains(text) ||
-          products.description.contains(text))
+      if (products.nameOfProduct.toLowerCase().contains(text.toLowerCase()) ||
+          products.description.toLowerCase().contains(text.toLowerCase()))
         setState(() {
           _searchResult.add(products);
         });
@@ -151,7 +158,6 @@ class _StoreScreenState extends State<StoreScreen> {
                     width: 20,
                   ),
                   Column(
-                    // mainAxisAlignment: MainAxisAlignment.center,
                     children: [
                       BagWidget(),
                     ],
@@ -166,18 +172,24 @@ class _StoreScreenState extends State<StoreScreen> {
               SizedBox(
                 height: 25,
               ),
-              Container(
-                padding:
-                    EdgeInsets.only(left: 14, right: 14, top: 6, bottom: 6),
-                child: Text(
-                  "Tap on an item for add, remove, delete options",
-                  style: TextStyle(
-                    fontWeight: FontWeight.bold,
-                  ),
-                ),
-                decoration: BoxDecoration(
-                    color: Colors.white,
-                    borderRadius: BorderRadius.circular(20)),
+              Consumer<Cart>(
+                builder: (context, value, child) {
+                  return value.countProduct != 0
+                      ? Container(
+                          padding: EdgeInsets.only(
+                              left: 14, right: 14, top: 6, bottom: 6),
+                          child: Text(
+                            "Tap on an item for add, remove, delete options",
+                            style: TextStyle(
+                              fontWeight: FontWeight.bold,
+                            ),
+                          ),
+                          decoration: BoxDecoration(
+                              color: Colors.white,
+                              borderRadius: BorderRadius.circular(20)),
+                        )
+                      : Container();
+                },
               ),
               SizedBox(
                 height: 18,
@@ -193,102 +205,197 @@ class _StoreScreenState extends State<StoreScreen> {
                         builder: (context, cart, child) {
                           return ListView.builder(
                             padding: EdgeInsets.all(9),
-                            itemCount: cart.countProduct,
+                            itemCount: cart.productsInCart.length,
                             itemBuilder: (context, index) {
+                              bool showMore =
+                                  cart.productsInCart.elementAt(index).showMore;
                               return Column(
                                 children: [
-                                  ListTile(
-                                    leading: CircleAvatar(
-                                        backgroundImage: NetworkImage(cart
-                                            .productsInCart
-                                            .elementAt(index)
-                                            .productImage)),
-                                    title: Text(
-                                      cart.productsInCart
-                                          .elementAt(index)
-                                          .nameOfProduct,
-                                      style: TextStyle(color: Colors.white),
-                                    ),
-                                    onTap: toggleShowMoreInCart,
-                                    trailing: Text(
-                                        "#" +
-                                            cart.productsInCart
-                                                .elementAt(index)
-                                                .price
-                                                .toString(),
-                                        style: TextStyle(color: Colors.white)),
-                                    subtitle: Text(
-                                        cart.productsInCart
-                                            .elementAt(index)
-                                            .type,
-                                        style: TextStyle(color: Colors.white)),
-                                  ),
-                                  showMore
-                                      ? Row(
-                                          mainAxisAlignment:
-                                              MainAxisAlignment.spaceBetween,
+                                  GestureDetector(
+                                    onTap: () {
+                                      cart.toggleShowMore(
+                                          cart.productsInCart.elementAt(index));
+                                    },
+                                    child: Container(
+                                      child: Padding(
+                                        padding: const EdgeInsets.all(5.0),
+                                        child: Row(
+                                          crossAxisAlignment:
+                                              CrossAxisAlignment.center,
                                           children: [
-                                            IconButton(
-                                              onPressed: () {},
-                                              icon: FaIcon(
-                                                  FontAwesomeIcons.trash,
-                                                  color: Colors.white),
+                                            CircleAvatar(
+                                                radius: 30,
+                                                backgroundImage: NetworkImage(
+                                                    cart.productsInCart
+                                                        .elementAt(index)
+                                                        .productImage)),
+                                            SizedBox(
+                                              width: 17,
                                             ),
+                                            // Quantity
+                                            Text(
+                                              cart.productsInCart
+                                                      .elementAt(index)
+                                                      .quantity
+                                                      .toString() +
+                                                  "X",
+                                              style: TextStyle(
+                                                color: Colors.white,
+                                                fontSize: 17,
+                                              ),
+                                            ),
+                                            SizedBox(
+                                              width: 17,
+                                            ),
+                                            // head
                                             Column(
+                                              crossAxisAlignment:
+                                                  CrossAxisAlignment.start,
                                               children: [
-                                                CustomNumberPicker(
-                                                     
-                                                    customAddButton:
-                                                        Container(
-                                                      width: 50,
-                                                      height: 50,
-                                                      child: Center(
-                                                        child: Icon(Icons.add,
-                                                            color:
-                                                                UniversalVariables
-                                                                    .droPurple),
-                                                      ),
-                                                      decoration:
-                                                          BoxDecoration(
-                                                        borderRadius:
-                                                            BorderRadius
-                                                                .circular(50),
-                                                        color: Colors.white,
-                                                      ),
-                                                    ),
-                                                    step: 1,
-                                                    shape:
-                                                        RoundedRectangleBorder(
-                                                      side: BorderSide.none,
-                                                    ),
-                                                    customMinusButton:
-                                                        Container(
-                                                      width: 50,
-                                                      height: 50,
-                                                      child: Center(
-                                                        child: Icon(
-                                                            Icons.remove,
-                                                            color:
-                                                                UniversalVariables
-                                                                    .droPurple),
-                                                      ),
-                                                      decoration:
-                                                          BoxDecoration(
-                                                        borderRadius:
-                                                            BorderRadius
-                                                                .circular(50),
-                                                        color: Colors.white,
-                                                      ),
-                                                    ),
-                                                    onValue: (value) {
-                                                      print(value.toString());
-                                                    },
-                                                    initialValue: 1,
-                                                    maxValue: 10,
-                                                    minValue: 0),
+                                                Text(
+                                                  cart.productsInCart
+                                                      .elementAt(index)
+                                                      .nameOfProduct,
+                                                  style: TextStyle(
+                                                      color: Colors.white,
+                                                      fontSize: 17),
+                                                ),
+                                                SizedBox(
+                                                  width: 17,
+                                                ),
+                                                // subtitle
+                                                Text(
+                                                    cart.productsInCart
+                                                        .elementAt(index)
+                                                        .type,
+                                                    style: TextStyle(
+                                                      color: Colors.white,
+                                                      fontStyle:
+                                                          FontStyle.italic,
+                                                    )),
                                               ],
                                             ),
+                                            // trailing
+                                            SizedBox(
+                                              width: size.width * 0.2,
+                                            ),
+                                            Text(
+                                                "#" +
+                                                    cart.productsInCart
+                                                        .elementAt(index)
+                                                        .price
+                                                        .toString(),
+                                                style: TextStyle(
+                                                    color: Colors.white,
+                                                    fontSize: 17)),
                                           ],
+                                        ),
+                                      ),
+                                    ),
+                                  ),
+                                  showMore
+                                      ? Consumer<Cart>(
+                                          builder: (context, cart, child) {
+                                            int initialQuantity = cart
+                                                .productsInCart
+                                                .elementAt(index)
+                                                .quantity;
+                                            return Row(
+                                              mainAxisAlignment:
+                                                  MainAxisAlignment
+                                                      .spaceBetween,
+                                              children: [
+                                                IconButton(
+                                                  onPressed: () {
+                                                    cart.deleteItemFromCart(
+                                                        index);
+                                                    setState(() {
+                                                      showMore = false;
+                                                    });
+                                                  },
+                                                  icon: FaIcon(
+                                                      FontAwesomeIcons.trash,
+                                                      color: Colors.white),
+                                                ),
+                                                Column(
+                                                  children: [
+                                                    CustomNumberPicker(
+                                                        customAddButton:
+                                                            Container(
+                                                          width: 50,
+                                                          height: 50,
+                                                          child: Center(
+                                                            child: Icon(
+                                                                Icons.add,
+                                                                color: UniversalVariables
+                                                                    .droPurple),
+                                                          ),
+                                                          decoration:
+                                                              BoxDecoration(
+                                                            borderRadius:
+                                                                BorderRadius
+                                                                    .circular(
+                                                                        50),
+                                                            color: Colors.white,
+                                                          ),
+                                                        ),
+                                                        step: 1,
+                                                        shape:
+                                                            RoundedRectangleBorder(
+                                                          side: BorderSide.none,
+                                                        ),
+                                                        customMinusButton:
+                                                            Container(
+                                                          width: 50,
+                                                          height: 50,
+                                                          child: Center(
+                                                            child: Icon(
+                                                                Icons.remove,
+                                                                color: UniversalVariables
+                                                                    .droPurple),
+                                                          ),
+                                                          decoration:
+                                                              BoxDecoration(
+                                                            borderRadius:
+                                                                BorderRadius
+                                                                    .circular(
+                                                                        50),
+                                                            color: Colors.white,
+                                                          ),
+                                                        ),
+                                                        onValue: (value) {
+                                                          if (value >
+                                                              initialQuantity) {
+                                                            initialQuantity =
+                                                                value;
+                                                            cart.incrementItemToCart(
+                                                                index);
+                                                          } else if (value <
+                                                              initialQuantity) {
+                                                            if (value == 0) {
+                                                              setState(() {
+                                                                showMore =
+                                                                    false;
+                                                              });
+                                                            }
+                                                            initialQuantity =
+                                                                value;
+                                                            cart.decrementItemFromCart(
+                                                                index);
+                                                          }
+                                                        },
+                                                        initialValue:
+                                                            initialQuantity,
+                                                        maxValue:
+                                                            initialQuantity > 10
+                                                                ? initialQuantity
+                                                                : 10,
+                                                        minValue: 0),
+                                                  ],
+                                                ),
+                                              ],
+                                            );
+                                          },
                                         )
                                       : Container(),
                                 ],
@@ -299,14 +406,25 @@ class _StoreScreenState extends State<StoreScreen> {
                         },
                       )),
                       Padding(
-                        padding: const EdgeInsets.only(top: 18),
+                        padding: const EdgeInsets.only(
+                            top: 18, left: 10, right: 10, bottom: 10),
                         child: Row(
                           mainAxisAlignment: MainAxisAlignment.spaceBetween,
                           children: [
                             Text("Total",
-                                style: TextStyle(color: Colors.white)),
-                            Text("#2590",
-                                style: TextStyle(color: Colors.white)),
+                                style: TextStyle(
+                                  color: Colors.white,
+                                  fontSize: 20,
+                                )),
+                            Consumer<Cart>(
+                              builder: (context, value, child) {
+                                return Text("#" + value.cartSubtotal.toString(),
+                                    style: TextStyle(
+                                      color: Colors.white,
+                                      fontSize: 20,
+                                    ));
+                              },
+                            ),
                           ],
                         ),
                       ),
@@ -469,11 +587,11 @@ class _StoreScreenState extends State<StoreScreen> {
                   ],
                 ),
               ),
-              // SingleChildScrollView(child: Column()),
               searchBar
                   ? Padding(
                       padding: EdgeInsets.all(10),
                       child: TextField(
+                        focusNode: searchFocusNode,
                         controller: textController,
                         onChanged: (value) {
                           setState(() {
@@ -493,6 +611,8 @@ class _StoreScreenState extends State<StoreScreen> {
                                     setState(() {
                                       searchText = "";
                                       textController.clear();
+                                      _searchResult.clear();
+                                      FocusScope.of(context).unfocus();
                                     });
                                   },
                                   child: Icon(Icons.cancel_outlined,
@@ -526,8 +646,7 @@ class _StoreScreenState extends State<StoreScreen> {
                 child: Container(
                   height: size.height * 0.9,
                   padding: EdgeInsets.all(10),
-                  child: _searchResult.length != 0 ||
-                          textController.text.isNotEmpty
+                  child: _searchResult.length != 0 || searchText != ""
                       ? GridView.builder(
                           padding: const EdgeInsets.only(bottom: 100),
                           physics: BouncingScrollPhysics(),

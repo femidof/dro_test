@@ -2,61 +2,102 @@ import 'package:dro_health/index.dart';
 
 class Cart with ChangeNotifier {
   List<Product> _cartProductlist = [];
+  List<String> _productUIds = [];
 
-  Map<Product, int> _cartProductMap = {
-    Product(
-      type: "Tablet",
-      measure: "125mg",
-      packSize: "3x10",
-      constituent: ["water", "Vitamins"],
-      description: "Citric Acid",
-      dispenseIn: "Bottle",
-      nameOfProduct: "Orange Juice",
-      price: 2000,
-      productId: "In34hsdkihksf",
-      seller: "Jason Lolo",
-      sellerImage:
-          "https://images.unsplash.com/photo-1438761681033-6461ffad8d80?ixid=MXwxMjA3fDB8MHxzZWFyY2h8MXx8cGVyc29ufGVufDB8fDB8&ixlib=rb-1.2.1&auto=format&fit=crop&w=500&q=60",
-      productImage:
-          "https://images.unsplash.com/photo-1585611680828-24e7b3608ce3?ixid=MXwxMjA3fDB8MHxzZWFyY2h8Nnx8b3JhbmdlJTIwanVpY2V8ZW58MHx8MHw%3D&ixlib=rb-1.2.1&auto=format&fit=crop&w=500&q=60",
-    ): 1,
-  };
+  int _cartTotal = 0;
+  int _cartTotalProductCount = 0;
 
-  int _totalCost = 0;
-  void add(Product product) {
-    if (_cartProductMap.containsKey(product)) {
-      _cartProductMap.update(product, (value) => value++);
+  toggleShowMore(Product product) {
+    if (product.showMore) {
+      _cartProductlist.forEach((element) {
+        element.showMore = false;
+      });
     } else {
-      _cartProductMap[product] = 1;
+      _cartProductlist.forEach((element) {
+        element.showMore = false;
+      });
+      product.showMore = !product.showMore;
     }
-    for (Product product in _cartProductMap.keys) {
-      _totalCost += product.price;
+    notifyListeners();
+  }
+
+  void addToCart(
+      {@required Product product,
+      @required String productId,
+      @required int unitPrice,
+      @required int quantity}) {
+    bool notInCart = false;
+    if (_cartProductlist.isEmpty) {
+      product.quantity = quantity;
+      product.subTotal = quantity * unitPrice;
+      _cartTotal = _cartTotal + product.subTotal;
+      _productUIds.add(productId);
+      _cartProductlist.add(product);
+    } else {
+      _cartProductlist.forEach((element) {
+        if (element.productId == productId) {
+          element.quantity += quantity;
+          product.subTotal = quantity * unitPrice;
+          _cartTotal = _cartTotal + product.subTotal;
+        } else {
+          notInCart = true;
+        }
+      });
+    }
+    if (notInCart) {
+      product.quantity = quantity;
+      product.subTotal = quantity * unitPrice;
+      _cartTotal = _cartTotal + product.subTotal;
+      _productUIds.add(productId);
+      _cartProductlist.add(product);
+      notInCart = false;
     }
     notifyListeners();
   }
 
   int get countProduct {
-    return _cartProductlist.length;
+    _cartTotalProductCount = 0;
+    _cartProductlist.forEach((element) {
+      _cartTotalProductCount += element.quantity;
+    });
+    return _cartTotalProductCount;
   }
 
-  int get totalprice {
-    return _totalCost;
+  deleteItemFromCart(
+    int index,
+  ) {
+    for (int i = _cartProductlist[index].quantity; i > 0; i--) {
+      decrementItemFromCart(index);
+    }
+    notifyListeners();
+  }
+
+  decrementItemFromCart(int index) {
+    if (_cartProductlist[index].quantity > 1) {
+      _cartProductlist[index].quantity = --_cartProductlist[index].quantity;
+      _cartProductlist[index].subTotal =
+          (_cartProductlist[index].quantity * _cartProductlist[index].price);
+    } else {
+      _cartProductlist.removeAt(index);
+    }
+    notifyListeners();
+  }
+
+  incrementItemToCart(int index) {
+    _cartProductlist[index].quantity = ++_cartProductlist[index].quantity;
+    _cartProductlist[index].subTotal =
+        (_cartProductlist[index].quantity * _cartProductlist[index].price);
+    notifyListeners();
   }
 
   List<Product> get productsInCart {
-    return _cartProductMap.entries.map((element) => _cartProductlist.add(
-        Product(
-            nameOfProduct: element.key.nameOfProduct,
-            price: element.key.price,
-            productImage: element.key.productImage,
-            description: element.key.description,
-            productId: element.key.productId,
-            seller: element.key.seller,
-            dispenseIn: element.key.dispenseIn,
-            constituent: element.key.constituent,
-            sellerImage: element.key.sellerImage,
-            packSize: element.key.packSize,
-            type: element.key.type,
-            measure: element.key.measure)));
+    return _cartProductlist;
+  }
+
+  int get cartSubtotal {
+    _cartTotal = 0;
+    _cartProductlist
+        .forEach((element) => _cartTotal += element.quantity * element.price);
+    return _cartTotal;
   }
 }

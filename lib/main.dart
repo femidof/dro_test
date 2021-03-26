@@ -19,7 +19,7 @@ class MyApp extends StatelessWidget {
         theme: ThemeData(
           fontFamily: "Proxima Nova",
           appBarTheme: AppBarTheme(
-            color: Colors.white,
+            color: UniversalVariables.white,
             iconTheme: IconThemeData(
               color: Colors.black,
             ),
@@ -45,7 +45,7 @@ class RootApp extends StatelessWidget {
     }
 
     return Scaffold(
-      backgroundColor: Colors.white,
+      backgroundColor: UniversalVariables.white,
       body: Center(
         child: ElevatedButton.icon(
           icon: Icon(Icons.store_mall_directory_outlined),
